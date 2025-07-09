@@ -6,24 +6,16 @@
     <title>Binance Kline Downloader</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
-        h2, h3 { color: #333; }
+        h2 { color: #333; }
         .button-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         button {
             background-color: #007bff; color: white; border: none;
             padding: 10px 20px; border-radius: 5px; cursor: pointer; min-width: 150px;
         }
         button:hover { background-color: #0056b3; }
-        .table-container { overflow-x: auto; }
-        table {
-            width: 100%; border-collapse: collapse; background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-width: 800px;
-        }
-        th, td { padding: 10px; border-bottom: 1px solid #ddd; text-align: center; }
-        th { background: #f0f0f0; }
-        .log-box {
-            background: #111; color: #00ff88; padding: 10px; margin-top: 20px;
-            border-radius: 5px; font-family: monospace; height: 150px; overflow-y: auto;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+        .log-box { background: #111; color: #00ff88; padding: 10px; margin-top: 20px; height: 150px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -37,28 +29,24 @@
     <button onclick="copyTableData()">Copy Table Data</button>
 </div>
 
-<h3>Last Candle Stick Data</h3>
-<div class="table-container">
-    <table>
-        <thead>
-            <tr>
-                <th>Timeframe</th>
-                <th>Open Time</th>
-                <th>Open Time (IST)</th>
-                <th>Open</th>
-                <th>High</th>
-                <th>Low</th>
-                <th>Close</th>
-                <th>Close Time</th>
-                <th>Close Time (IST)</th>
-                <th>Volume</th>
-            </tr>
-        </thead>
-        <tbody id="candleTableBody"></tbody>
-    </table>
-</div>
+<table>
+    <thead>
+        <tr>
+            <th>Timeframe</th>
+            <th>Open Time</th>
+            <th>Open Time (IST)</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Close</th>
+            <th>Close Time</th>
+            <th>Close Time (IST)</th>
+            <th>Volume</th>
+        </tr>
+    </thead>
+    <tbody id="candleTableBody"></tbody>
+</table>
 
-<h3>Activity Logs</h3>
 <div class="log-box" id="logBox"></div>
 
 <script>
@@ -74,50 +62,40 @@ function formatIST(timestamp) {
     return new Date(timestamp).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 }
 
-function isMobile() {
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
+async function downloadFile(url, baseFilename, timeframe) {
+    addLog(`Downloading ${timeframe}...`);
+    const response = await fetch(url);
+    const data = await response.json();
+    candleData[timeframe] = data;
 
-async function downloadFileWithTimestamp(url, baseFilename, timeframe) {
-    try {
-        addLog(`Downloading data for ${timeframe}...`);
-        const response = await fetch(url);
-        const data = await response.json();
-        candleData[timeframe] = data;
+    const lastTimestamp = data[data.length - 1][0];
+    const filename = `${baseFilename}_${lastTimestamp}.json`;
 
-        const lastTimestamp = data[data.length - 1][0];
-        const filename = `${baseFilename}_${lastTimestamp}.json`;
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const blobUrl = URL.createObjectURL(blob);
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blobUrl = URL.createObjectURL(blob);
 
-        if (isMobile()) {
-            window.open(blobUrl, '_blank');
-            addLog(`✅ Opened ${timeframe} data in a new tab (long press to save on mobile).`);
-        } else {
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            addLog(`✅ Downloaded ${timeframe}: ${filename}`);
-            URL.revokeObjectURL(blobUrl);
-        }
-    } catch (err) {
-        addLog(`❌ Error downloading ${timeframe}: ${err}`);
-    }
+    // Create and click a download link
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    addLog(`✅ Downloaded ${timeframe}: ${filename}`);
+    URL.revokeObjectURL(blobUrl);
 }
 
 function downloadAll() {
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=15m&limit=1440", "BTCUSDT_15m", "15m");
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=360", "BTCUSDT_1h", "1h");
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=90", "BTCUSDT_4h", "4h");
+    downloadFile("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=15m&limit=1440", "BTCUSDT_15m", "15m");
+    downloadFile("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=360", "BTCUSDT_1h", "1h");
+    downloadFile("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=90", "BTCUSDT_4h", "4h");
 }
 
 function downloadPreview() {
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=15m&limit=256", "Preview_15m", "15m");
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=64", "Preview_1h", "1h");
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=16", "Preview_4h", "4h");
+    downloadFile("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=15m&limit=256", "Preview_15m", "15m");
+    downloadFile("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=64", "Preview_1h", "1h");
+    downloadFile("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=16", "Preview_4h", "4h");
 }
 
 function showLastCandles() {
@@ -158,7 +136,7 @@ function copyTableData() {
             .map(td => td.innerText).join("\t") + "\n";
     });
     navigator.clipboard.writeText(text)
-        .then(() => addLog("✅ Table data copied to clipboard."))
+        .then(() => addLog("✅ Table copied to clipboard"))
         .catch(err => addLog("❌ Copy failed: " + err));
 }
 </script>
