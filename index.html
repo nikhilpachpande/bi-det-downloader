@@ -11,41 +11,44 @@
             background-color: #0e1117;
             color: #e0e0e0;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            padding: 10px;
         }
 
         header h1 {
             margin: 0;
-            font-size: 2.5em;
+            font-size: 2em;
             color: #00e676;
         }
 
         header p {
             color: #aaa;
+            font-size: 0.9em;
         }
 
         .button-group, .chart-controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
             justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         button {
             background-color: #00e676;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 12px 16px;
+            font-size: 15px;
             color: #0e1117;
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s;
+            min-width: 120px;
         }
 
         button:hover {
@@ -58,21 +61,23 @@
             border: 1px solid #333;
             background-color: #1c1f26;
             color: #e0e0e0;
+            font-size: 14px;
         }
 
         .table-container {
             overflow-x: auto;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             background-color: #1c1f26;
+            font-size: 14px;
         }
 
         th, td {
-            padding: 12px;
+            padding: 8px;
             border: 1px solid #333;
             text-align: center;
         }
@@ -89,6 +94,7 @@
         .warning {
             color: #ff5252;
             font-weight: bold;
+            font-size: 14px;
         }
 
         .log-box {
@@ -99,7 +105,39 @@
             height: 200px;
             overflow-y: auto;
             font-family: monospace;
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        #chartContainer {
+            height: 300px;
+            width: 100%;
+            background-color: #0e1117;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            button {
+                padding: 10px;
+                font-size: 14px;
+                min-width: 100px;
+            }
+
+            select, input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .chart-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #chartContainer {
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -149,7 +187,7 @@
 </div>
 
 <h3>Candle Chart</h3>
-<div id="chartContainer" style="height: 400px; width: 100%; background-color: #0e1117;"></div>
+<div id="chartContainer"></div>
 
 <h3>Logs</h3>
 <div class="log-box" id="logBox"></div>
@@ -285,6 +323,11 @@ function showCandleChart() {
         y: [parseFloat(c[1]), parseFloat(c[2]), parseFloat(c[3]), parseFloat(c[4])]
     }));
 
+    const firstTime = dataPoints[0].x.getTime();
+    const lastTime = dataPoints[dataPoints.length - 1].x.getTime();
+    const padding = (lastTime - firstTime) * 0.1;
+    const maxTime = new Date(lastTime + padding);
+
     const chart = new CanvasJS.Chart("chartContainer", {
         backgroundColor: "#0e1117",
         animationEnabled: true,
@@ -292,17 +335,28 @@ function showCandleChart() {
         axisY: {
             includeZero: false,
             title: "Price",
-            labelFontColor: "#e0e0e0"
+            labelFontColor: "#FFFFFF"
         },
         axisX: {
-            labelFontColor: "#e0e0e0"
+            labelFontColor: "#e0e0e0",
+            viewportMinimum: dataPoints[0].x,
+            viewportMaximum: maxTime
         },
-       data: [{
-    type: "candlestick",
-  
-    dataPoints: dataPoints
-}]
-
+        data: [{
+            type: "candlestick", 
+            dataPoints: dataPoints,
+ risingColor: "#00e676",
+        fallingColor: "#ff5252",
+        lineColor: "#cccccc",
+        lineThickness: 1,
+        showInLegend: true,
+        name: timeframe.toUpperCase() + " Candles",
+        toolTipContent: "Open: {y[0]}<br/>High: {y[1]}<br/>Low: {y[2]}<br/>Close: {y[3]}",
+        click: function (e) {
+            addLog(`🕯️ Candle clicked: Open ${e.dataPoint.y[0]}, Close ${e.dataPoint.y[3]}`);
+        }
+			
+        }]
     });
 
     chart.render();
