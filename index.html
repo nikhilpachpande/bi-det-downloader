@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Candle Viewer</title>
     <script type="text/javascript" src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
     <style>
@@ -12,8 +12,6 @@
             color: #e0e0e0;
             margin: 0;
             padding: 10px;
-            max-width: 100%;
-            overflow-x: hidden;
         }
 
         header {
@@ -39,9 +37,6 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 15px;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 0 5px;
         }
 
         button {
@@ -117,8 +112,6 @@
             height: 300px;
             width: 100%;
             background-color: #0e1117;
-            min-height: 250px;
-            box-sizing: border-box;
         }
 
         @media (max-width: 600px) {
@@ -126,18 +119,20 @@
                 font-size: 1.5em;
             }
 
-            .button-group, .chart-controls {
-                flex-direction: column;
-                align-items: stretch;
+            button {
+                padding: 10px;
+                font-size: 14px;
+                min-width: 100px;
             }
 
-            button, select, input {
+            select, input {
                 width: 100%;
                 box-sizing: border-box;
             }
 
-            .table-container {
-                overflow-x: scroll;
+            .chart-controls {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             #chartContainer {
