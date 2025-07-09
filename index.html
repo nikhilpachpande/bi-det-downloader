@@ -179,9 +179,9 @@ function downloadAll() {
 }
 
 function downloadPreview() {
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=15m&limit=256", "Preview_15m", "15m");
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=64", "Preview_1h", "1h");
-    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=16", "Preview_4h", "4h");
+    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=15m&limit=256", "btcusdt_15m", "15m");
+    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=64", "btcusdt_1h", "1h");
+    downloadFileWithTimestamp("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=4h&limit=16", "btcusdt_4h", "4h");
 }
 
 function showLastCandles() {
